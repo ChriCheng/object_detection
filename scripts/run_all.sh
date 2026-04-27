@@ -4,17 +4,18 @@ set -euo pipefail
 NUM_IMAGES="${1:-500}"
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-if [ "${DEVICE_TARGET:-CPU}" = "GPU" ]; then
-  source "$PROJECT_ROOT/scripts/env_mindspore_gpu.sh"
+# 默认启用 MindSpore GPU 环境
+source "$PROJECT_ROOT/scripts/env_mindspore_gpu.sh"
+
+bash "$PROJECT_ROOT/scripts/setup_mindyolo.sh"
+bash "$PROJECT_ROOT/scripts/download_yolov8n_weight.sh"
+
+if [ ! -d "$PROJECT_ROOT/data/raw/coco/val2017" ] || [ ! -f "$PROJECT_ROOT/data/raw/coco/annotations/instances_val2017.json" ]; then
+  bash "$PROJECT_ROOT/scripts/download_coco_val2017.sh"
 fi
 
-#!/usr/bin/env bash
-set -euo pipefail
-N="${1:-500}"; ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-bash "$ROOT/scripts/setup_mindyolo.sh"
-bash "$ROOT/scripts/download_yolov8n_weight.sh"
-[ -d "$ROOT/data/raw/coco/val2017" ] && [ -f "$ROOT/data/raw/coco/annotations/instances_val2017.json" ] || bash "$ROOT/scripts/download_coco_val2017.sh"
-bash "$ROOT/scripts/prepare_coco_subset.sh" "$N"
-bash "$ROOT/scripts/run_predict_yolov8n.sh"
-bash "$ROOT/scripts/run_eval_yolov8n.sh"
-python "$ROOT/src/summarize_project.py"
+bash "$PROJECT_ROOT/scripts/prepare_coco_subset.sh" "$NUM_IMAGES"
+bash "$PROJECT_ROOT/scripts/run_predict_yolov8n.sh"
+bash "$PROJECT_ROOT/scripts/run_eval_yolov8n.sh"
+
+python "$PROJECT_ROOT/src/summarize_project.py" || true
