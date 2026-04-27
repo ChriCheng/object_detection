@@ -1,4 +1,6 @@
 logs/*
 results/*
 docs/*
+data/*
 configs/*
+third_party/*

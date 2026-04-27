@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
+NUM_IMAGES="${1:-500}"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+if [ "${DEVICE_TARGET:-CPU}" = "GPU" ]; then
+  source "$PROJECT_ROOT/scripts/env_mindspore_gpu.sh"
+fi
+
+#!/usr/bin/env bash
+set -euo pipefail
 N="${1:-500}"; ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 bash "$ROOT/scripts/setup_mindyolo.sh"
 bash "$ROOT/scripts/download_yolov8n_weight.sh"
